@@ -1,0 +1,46 @@
+1. Singleton
+    função: garante que uma classe tenha uma única instância global e fornece um ponto de acesso controlado a ela
+    objetivo: evita múltiplos objetos de uma mesma classe que deveriam ser únicos, como o forno
+
+    Forno possui um construtor privado e um getInstance(), garantindo que sempre que uma classe precisar usar ele,
+    será chamada a mesma instância
+
+2. Factory
+    função: define uma interface para criar um objeto, mas deixa que subclasses decidam qual classe concreta instanciar.
+    objetivo: facilita a adição de novos tipos de pizza sem modificar a GUI ou código cliente.
+
+    temos um produto abstrato (Pizza) que define a base para as todas as pizzas.
+    temos os produtos concretos (PizzaCalabresa e PizzaMargherita) que implementam a Pizza.
+    temos uma fábrica abstrata (PizzaFactory) que define o método criarPizza() que retorna uma Pizza.
+    temos as fábricas concretas (MargheritaFactory e CalabresaFactory) que implementam o criarPizza(), retornando uma pizza concreta.
+
+    o factory é utilizado para criar pizzas sem conhecer a classe concreta:
+    new MargheritaFactory().criarPizza()
+    [isso é bom porque a factory é quem controla a instanciação da pizza, ela pode configurar valores padrão, inicializar propriedades
+    específicas, basicamente a lógica de criação é isolada, além disso ela gera desacoplamento, só interagindo com a abstração da pizza,
+    assim é mais fácil adicionar novos sabores no futuro
+    
+    A GUI apenas pede: "crie uma pizza Margherita".
+    Ela não precisa conhecer os detalhes internos (PizzaMargherita), nem instanciar diretamente a classe.]
+
+3. Observer
+    exemplos: jornal, se você se inscrever para um jornal, eles trazem até você, não para todo mundo, apenas para quem é inscrito,
+              caso contrário, você precisaria ir até a banca todo dia ver se já lançou o jornal.
+              
+              restaurante, quando o pedido fica pronto, teríamos dois casos sem os observers
+                    ou cada cliente vai até a cozinha e verifica se seu pedido está pronto
+                    ou o restaurante avisa todo mundo que certo pedido está pronto, e o dono reage
+                    com o observer, o cliente observa apenas o pedido que está interessado e nenhum lado gasta recursos extras.
+
+    nesse caso da pizzaria, a pizzaria é a publisher e os clientes são os subscribers
+
+    função: permite que um objeto (subject) notifique outros objetos (observers) quando seu algo muda, sem que haja acoplamento direto.
+    objetivo: ideal para eventos "publish-subscribe", ou um mecanismo de notificações
+
+    temos a interface (Observer), que define o "contrato" para qualquer objeto que queira ser notificado.
+    temos o (Cliente) concreto que implementa o Observer, que vai reagir como precisar a uma notificação.
+    temos o (EventManager) que gerencia a lista de subscribers e notificações
+    temos a (Pizzaria) que tem um EventManager, que seria a "publisher"
+
+
+
