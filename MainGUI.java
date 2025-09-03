@@ -3,8 +3,10 @@ import java.awt.*;
 import factory.*;
 import observer.Cliente;
 import observer.Observador;
-import pizzaria.Forno;
 import pizzaria.Pizzaria;
+import factory.Pizza;
+import command.PedidoCommand;
+import command.PedidoPizzaCommand;
 
 public class MainGUI extends JFrame {
     private Pizzaria pizzaria;
@@ -20,12 +22,12 @@ public class MainGUI extends JFrame {
     private Cliente c3 = new Cliente("Cliente 3");
 
     public MainGUI() {
-        setTitle("Pizzaria Observer Demo");
+        setTitle("Pizzaria Observer + Singleton + Factory + Command");
         setSize(700, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        pizzaria = new Pizzaria();
+        pizzaria = Pizzaria.getInstance();
         logArea = new JTextArea();
         pizzaLabel = new JLabel();
         pizzaLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -63,17 +65,19 @@ public class MainGUI extends JFrame {
         add(pizzaPanel, BorderLayout.CENTER);
         add(logPanel, BorderLayout.EAST);
 
-        // Ações - FACTORY é utilizado para criar as pizzas
-        assarMargheritaBtn.addActionListener(e -> assarPizza(new MargheritaFactory().criarPizza()));
-        assarCalabresaBtn.addActionListener(e -> assarPizza(new CalabresaFactory().criarPizza()));
+        // Ações - FACTORY cria a pizza, COMMAND encapsula o pedido
+        assarMargheritaBtn.addActionListener(e -> criarPedido(new MargheritaFactory().criarPizza()));
+        assarCalabresaBtn.addActionListener(e -> criarPedido(new CalabresaFactory().criarPizza()));
     }
 
-    private void assarPizza(Pizza pizza) {
-        // SINGLETON é utilizado chamando a instância única do forno
-        Forno.getInstance().assarPizza(pizza.getNome());
+    private void criarPedido(Pizza pizza) {
+        // Cria o comando
+        PedidoCommand pedido = new PedidoPizzaCommand(pizza);
+        pizzaria.adicionarPedido(pedido);
 
-        logArea.append("Assando " + pizza.getNome() + "...\n");
+        logArea.append("Pedido adicionado: " + pizza.getNome() + "\n");
 
+        // Configura os clientes inscritos
         pizzaria.eventos.clear("pizza_pronta");
         if (chkCliente1.isSelected())
             pizzaria.eventos.subscribe("pizza_pronta", c1);
@@ -82,20 +86,26 @@ public class MainGUI extends JFrame {
         if (chkCliente3.isSelected())
             pizzaria.eventos.subscribe("pizza_pronta", c3);
 
+        // Processa o pedido depois de 3 segundos
         javax.swing.Timer timer = new javax.swing.Timer(3000, e -> {
-            pizzaria.pizzaPronta(pizza);
+            PedidoCommand cmd = pizzaria.processarProximoPedido();
+            if (cmd instanceof PedidoPizzaCommand pedidoPizza) {
+                Pizza p = pedidoPizza.getPizza();
 
-            // Imagem da pizza
-            String imgPath = pizza.getNome().equalsIgnoreCase("Margherita") ? "imagens/margherita.png"
-                    : "imagens/calabresa.png";
-            ImageIcon icon = new ImageIcon(imgPath);
-            Image scaled = icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
-            pizzaLabel.setIcon(new ImageIcon(scaled));
+                pizzaria.pizzaPronta(p); // dispara evento do Observer
 
-            // Clientes são notificados
-            logArea.append("Pizza " + pizza.getNome() + " pronta!\nClientes notificados:\n");
-            for (Observador c : pizzaria.eventos.getSubscribers("pizza_pronta")) {
-                logArea.append(" - " + c.getNome() + "\n");
+                // Mostra imagem da pizza
+                String imgPath = p.getNome().equalsIgnoreCase("Margherita") ? "imagens/margherita.png"
+                        : "imagens/calabresa.png";
+                ImageIcon icon = new ImageIcon(imgPath);
+                Image scaled = icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+                pizzaLabel.setIcon(new ImageIcon(scaled));
+
+                // Loga notificações
+                logArea.append("Pizza " + p.getNome() + " pronta!\nClientes notificados:\n");
+                for (Observador c : pizzaria.eventos.getSubscribers("pizza_pronta")) {
+                    logArea.append(" - " + c.getNome() + "\n");
+                }
             }
         });
         timer.setRepeats(false);
