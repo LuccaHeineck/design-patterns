@@ -8,6 +8,20 @@ public class PizzariaInvoker {
 
     public void adicionarPedido(PedidoCommand pedido) {
         filaPedidos.add(pedido);
+        processarPedidosComTimer();
+    }
+
+    private void processarPedidosComTimer() {
+        javax.swing.Timer timer = new javax.swing.Timer(2000, e -> {
+            if (!filaPedidos.isEmpty()) {
+                PedidoCommand cmd = processarProximoPedido();
+                if (cmd != null) {
+                    cmd.executar();
+                }
+            }
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 
     public PedidoCommand processarProximoPedido() {
