@@ -42,5 +42,9 @@
     temos o (EventManager) que gerencia a lista de subscribers e notificações
     temos a (Pizzaria) que tem um EventManager, que seria a "publisher"
 
+4. Command
+    função: encapsula a ação de assar uma pizza
+    objetivo: faz com que a interface não precise saber como assar uma pizza, dentro do execute ele sabe como funciona
+    eu só mando ele assar uma pizza
 
-
+    antes a lógica ficava toda espalhada pela interface

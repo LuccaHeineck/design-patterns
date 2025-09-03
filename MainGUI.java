@@ -22,7 +22,7 @@ public class MainGUI extends JFrame {
     private Cliente c3 = new Cliente("Cliente 3");
 
     public MainGUI() {
-        setTitle("Pizzaria Observer + Singleton + Factory + Command");
+        setTitle("Pizzaria");
         setSize(700, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
